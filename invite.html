@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App with Servers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://images.unsplash.com/photo-1511792776987-357b45026706?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDJ8fHNwYWNlfGVufDB8fHx8MTY5NzM5MjEwMQ&ixlib=rb-4.0.3&q=80&w=1920') no-repeat center center fixed; 
+            background-size: cover; 
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        #app {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            height: 100vh;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+        }
+        #server-list, #chat-box, #joined-servers {
+            width: 30%;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+        #server-list h3, #chat-box h3, #joined-servers h3 {
+            margin-top: 0;
+        }
+        .server-item {
+            cursor: pointer;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.3s ease;
+        }
+        .server-item:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        #server-form {
+            margin-bottom: 20px;
+        }
+        input[type="text"], button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #0077be;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005f8c;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Joined Servers -->
+        <div id="joined-servers">
+            <h3>Joined Servers</h3>
+            <div id="joined"></div>
+        </div>
+
+        <!-- Server List and Creation -->
+        <div id="server-list">
+            <h3>Recommended Servers</h3>
+            <div id="servers"></div>
+
+            <!-- Server Creation Form -->
+            <h3>Create New Server</h3>
+            <form id="server-form">
+                <input type="text" id="server-name" placeholder="Server Name" required />
+                <input type="text" id="server-theme" placeholder="Theme (e.g., space, ocean)" required />
+                <button type="submit">Create Server</button>
+            </form>
+        </div>
+
+        <!-- Chat Box -->
+        <div id="chat-box">
+            <h3>Chat</h3>
+            <div id="messages"></div>
+
+            <!-- Message Input -->
+            <form id="message-form">
+                <input type="text" id="message-input" placeholder="Type your message..." required />
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample server data (could come from a backend)
+        const servers = [];
+        const joinedServers = []; // Array to keep track of joined servers
+        const messages = [];
+
+        // Function to display servers
+        function displayServers() {
+            const serverList = document.getElementById('servers');
+            serverList.innerHTML = '';
+            servers.forEach(server => {
+                const serverItem = document.createElement('div');
+                serverItem.classList.add('server-item');
+                serverItem.innerHTML = `${server.name} <br> <small>Invite Link: <a href="${server.inviteLink}" target="_blank">${server.inviteLink}</a></small>`;
+                serverItem.onclick = () => joinServer(server);
+                serverList.appendChild(serverItem);
+            });
+        }
+
+        // Function to display joined servers
+        function displayJoinedServers() {
+            const joinedList = document.getElementById('joined');
+            joinedList.innerHTML = '';
+            joinedServers.forEach(server => {
+                const serverItem = document.createElement('div');
+                serverItem.classList.add('server-item');
+                serverItem.textContent = server.name; // Display server name
+                joinedList.appendChild(serverItem);
+            });
+        }
+
+        // Function to join a server
+        function joinServer(server) {
+            if (!joinedServers.includes(server)) {
+                joinedServers.push(server);
+                alert(`Joined server: ${server.name}`);
+                displayJoinedServers(); // Update the joined servers display
+            } else {
+                alert(`You are already in the server: ${server.name}`);
+            }
+        }
+
+        // Handle creating a new server
+        document.getElementById('server-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const serverName = document.getElementById('server-name').value;
+            const serverTheme = document.getElementById('server-theme').value;
+            const newServer = {
+                id: servers.length + 1,
+                name: serverName,
+                theme: serverTheme,
+                inviteLink: `http://dexxell.github.io/spacechat/invite/${servers.length + 1}` // Generate a unique invite link
+            };
+            servers.push(newServer);
+            displayServers();
+            alert(`Server "${serverName}" created with theme "${serverTheme}"! Invite link: ${newServer.inviteLink}`);
+        });
+
+        // Handle sending messages
+        document.getElementById('message-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value;
+            messages.push(message);
+            displayMessages();
+            messageInput.value = ''; // Clear input
+        });
+
+        // Function to display messages
+        function displayMessages() {
+            const messageBox = document.getElementById('messages');
+            messageBox.innerHTML = '';
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.textContent = msg;
+                messageBox.appendChild(messageDiv);
+            });
+        }
+
+        // Check for invite link on load
+        window.onload = () => {
+            const currentInvite = localStorage.getItem('currentInvite');
+            if (currentInvite) {
+                // Logic to join the server using the invite link
+                const server = servers.find(s => s.inviteLink === currentInvite);
+                if (server) {
+                    joinServer(server);
+                    // Clear the invite link from local storage after using it
+                    localStorage.removeItem('currentInvite');
+                }
+            }
+        };
+
+        // Display initial servers (empty at start)
+        displayServers();
+    </script>
+</body>
+</html>
